@@ -35,6 +35,11 @@ def _err(e):
     return e.response.get("Error", {}).get("Code", "Unknown")
 
 
+def mask_account_id(account_id):
+    """Redact all but the last 4 digits, e.g. 374786578995 -> ********8995."""
+    return "*" * (len(account_id) - 4) + account_id[-4:]
+
+
 def get_credential_report(iam):
     """Return list of rows from the IAM credential report, or raise ClientError."""
     for _ in range(10):
@@ -134,7 +139,7 @@ def main():
     evidence = {
         "check_id": "IAM-MFA-001",
         "title": "MFA enabled for root and all console IAM users",
-        "account_id": account_id,
+        "account_id": mask_account_id(account_id),
         "collected_at": datetime.now(timezone.utc).isoformat(),
         "controls": {"SOC2": ["CC6.1"], "ISO27001_2022": ["A.5.17", "A.8.5"],
                      "SAMA_CSF": ["3.3.5"]},
